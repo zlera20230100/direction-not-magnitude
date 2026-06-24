@@ -26,7 +26,7 @@ a.plot([0, 1], [0, 1], '--', color='0.6', lw=1.0, zorder=1, label='chance')
 a.set_xlabel('false positive rate'); a.set_ylabel('true positive rate')
 a.set_xlim(-0.02, 1.02); a.set_ylim(-0.02, 1.02)
 a.legend(loc='lower right', frameon=False, fontsize=8.2)
-a.set_title('(a) gate predicts gradient sign-reliability on an\nexternal photonics (TMM) benchmark',
+a.set_title('(a) gate predicts sign-reliability (external TMM)',
             loc='left', fontsize=9.0, fontweight='bold')
 
 # (b) separation of sign-agreement by outcome
@@ -41,13 +41,13 @@ b.axhline(tau, color='0.4', ls='--', lw=1.1, zorder=2)
 b.text(1.45, tau + 0.006, f'trust threshold {tau}', ha='right', va='bottom', fontsize=7.8, color='0.3')
 b.set_xticks([0, 1]); b.set_xticklabels([g[0] for g in grp]); b.set_xlim(-0.5, 1.5)
 b.set_ylabel('ensemble sign-agreement (10 seeds)'); b.set_ylim(0.45, 1.03)
-b.text(0.02, 0.40,
+b.text(0.02, 0.52,
        f"at $\\tau={tau}$: {ntr:.1f}/{K} components certified trustworthy;\n"
        f"hybrid follows the free gradient, preserving the\nTMM descent direction (cosine {cos_ad:.3f}) at "
        f"$<\\!1$ solve/grad",
        transform=b.transAxes, fontsize=7.8, va='top', ha='left', color='0.2',
        bbox=dict(boxstyle='round,pad=0.4', fc='#eef3ee', ec='0.7', lw=0.7))
-b.set_title('(b) the gate separates reliable from unreliable\ngradient components', loc='left',
+b.set_title('(b) reliable vs. unreliable gradient components', loc='left',
             fontsize=9.0, fontweight='bold')
 
 fig.tight_layout()
