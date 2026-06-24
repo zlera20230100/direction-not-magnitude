@@ -19,34 +19,48 @@ ntr = float(d['n_trust_mean']); K = int(d['K']); cos_ad = float(d['cos_ad'])
 
 fig, (a, b) = plt.subplots(1, 2, figsize=(10.4, 4.1), gridspec_kw={'width_ratios': [1.0, 1.05]})
 
-# (a) ROC
-fpr, tpr, _ = roc_curve(corr, sa)
-a.plot(fpr, tpr, '-', color=SIG, lw=2.0, zorder=3, label=f'sign-agreement gate (AUC {auc:.2f})')
-a.plot([0, 1], [0, 1], '--', color='0.6', lw=1.0, zorder=1, label='chance')
+# (a) ROC -- shaded area shows the AUC; the operating point sits at the trust threshold tau
+fpr, tpr, thr = roc_curve(corr, sa)
+a.fill_between(fpr, tpr, color=SIG, alpha=0.12, zorder=1)
+a.plot(fpr, tpr, '-', color=SIG, lw=2.3, zorder=3, solid_capstyle='round')
+a.plot([0, 1], [0, 1], '--', color='0.65', lw=1.0, zorder=2)
+j = int(np.argmin(np.abs(thr - tau)))
+a.plot(fpr[j], tpr[j], 'o', ms=7.5, mfc='white', mec=SIG, mew=1.8, zorder=4)
+a.annotate(rf'$\tau={tau}$', xy=(fpr[j], tpr[j]), xytext=(fpr[j] + 0.16, tpr[j] - 0.13),
+           fontsize=8.5, color=SIG, va='center',
+           arrowprops=dict(arrowstyle='-', color=SIG, lw=0.8))
+a.text(0.96, 0.07, f'AUC $=$ {auc:.2f}', ha='right', va='bottom', fontsize=12,
+       color=SIG, fontweight='bold')
+a.text(0.78, 0.70, 'chance', rotation=45, rotation_mode='anchor',
+       color='0.55', fontsize=8, va='bottom', ha='center')
 a.set_xlabel('false positive rate'); a.set_ylabel('true positive rate')
-a.set_xlim(-0.02, 1.02); a.set_ylim(-0.02, 1.02)
-a.legend(loc='lower right', frameon=False, fontsize=8.2)
+a.set_xlim(0, 1); a.set_ylim(0, 1); a.set_aspect('equal', adjustable='box')
+a.set_xticks([0, 0.5, 1]); a.set_yticks([0, 0.5, 1])
 a.set_title('(a) gate predicts sign-reliability (external TMM)',
             loc='left', fontsize=9.0, fontweight='bold')
 
-# (b) separation of sign-agreement by outcome
+# (b) separation -- trusted band, jittered points, and a coloured mean line per group
+b.axhspan(tau, 1.03, color=GRN, alpha=0.06, zorder=0)
+b.axhline(tau, color='0.45', ls='--', lw=1.1, zorder=2)
+b.text(1.47, tau + 0.008, rf'trust threshold $\tau={tau}$', ha='right', va='bottom',
+       fontsize=7.8, color='0.35')
 rng = np.random.default_rng(0)
 grp = [('sign-correct', sa[corr == 1], GRN), ('sign-wrong', sa[corr == 0], ACC)]
 for i, (lab, vals, col) in enumerate(grp):
-    if len(vals):
-        b.scatter(i + 0.09 * rng.standard_normal(len(vals)), vals, s=20, c=col, edgecolors='k',
-                  linewidths=0.25, alpha=0.55, zorder=3)
-        b.scatter([i], [vals.mean()], marker='_', s=900, c='k', zorder=4)
-b.axhline(tau, color='0.4', ls='--', lw=1.1, zorder=2)
-b.text(1.45, tau + 0.006, f'trust threshold {tau}', ha='right', va='bottom', fontsize=7.8, color='0.3')
-b.set_xticks([0, 1]); b.set_xticklabels([g[0] for g in grp]); b.set_xlim(-0.5, 1.5)
+    if not len(vals):
+        continue
+    b.scatter(i + 0.085 * rng.standard_normal(len(vals)), vals, s=18, c=col,
+              edgecolors='none', alpha=0.5, zorder=3)
+    m = float(vals.mean())
+    b.plot([i - 0.24, i + 0.24], [m, m], '-', color=col, lw=3.0, zorder=5, solid_capstyle='round')
+    b.annotate(f'mean {m:.2f}', xy=(i + 0.24, m), xytext=(i + 0.30, m),
+               va='center', ha='left', fontsize=8.3, color=col, fontweight='bold')
+b.set_xticks([0, 1]); b.set_xticklabels([g[0] for g in grp]); b.set_xlim(-0.5, 1.55)
 b.set_ylabel('ensemble sign-agreement (10 seeds)'); b.set_ylim(0.45, 1.03)
-b.text(0.02, 0.52,
-       f"at $\\tau={tau}$: {ntr:.1f}/{K} components certified trustworthy;\n"
-       f"hybrid follows the free gradient, preserving the\nTMM descent direction (cosine {cos_ad:.3f}) at "
-       f"$<\\!1$ solve/grad",
-       transform=b.transAxes, fontsize=7.8, va='top', ha='left', color='0.2',
-       bbox=dict(boxstyle='round,pad=0.4', fc='#eef3ee', ec='0.7', lw=0.7))
+b.text(0.5, 0.035,
+       rf'$\tau={tau}$: ${ntr:.1f}/{K}$ trusted $\Rightarrow$ hybrid follows the free gradient '
+       rf'(cosine {cos_ad:.3f}) at $<\!1$ solve/grad',
+       transform=b.transAxes, fontsize=7.4, va='bottom', ha='center', color='0.35')
 b.set_title('(b) reliable vs. unreliable gradient components', loc='left',
             fontsize=9.0, fontweight='bold')
 
