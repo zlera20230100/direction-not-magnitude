@@ -94,8 +94,8 @@ structure; raw ICC cannot separate "shared signal" from "shared bias". So rho-ha
   certified components in equal proportion, so the *ratio* wrong/certified is unchanged. A single
   trial-level scalar cannot point at *which* component is the flipped one (verified: rho-hat's AUC
   for the per-component wrong label is ≈ 0.43, i.e. chance).
-- **PER-COMPONENT self-aware gate works.** False-trust is cut **~70 % across the exploit band**
-  (rho 0.5/0.6/0.7: 0.044→0.013, 0.059→0.022, 0.070→0.034) and **−41 % at rho = 0.8**, while the
+- **PER-COMPONENT self-aware gate works.** False-trust is cut **by ~70 % at rho=0.5, easing to ~62 % at
+  0.6 and ~52 % at 0.7** (0.044→0.013, 0.059→0.022, 0.070→0.034) and **−41 % at rho = 0.8**, while the
   assembled-gradient error falls to near the global gate's at far lower cost (rho = 0.8:
   err 0.593 vs 0.628, cost 1.48 vs 3.38). At rho = 0 it costs almost nothing (cost 2.19 → 2.39,
   FT → 0).
@@ -136,8 +136,8 @@ sharper noise-scale estimate at larger M.
   (it only buys very expensive deferrals). Detecting the regime is necessary but not sufficient.
 - **What actually fixes it?** A **per-component** self-aware test that drops certified components
   with anomalously large across-seed spread `sd_k` — the observable signature of the high-σ
-  components on which shared-bias sign-flips ride. This cuts false-trust ~70 % across rho =
-  0.5–0.7 and 41 % at rho = 0.8, lowers gradient error well below the plain gate, and stays cheap
+  components on which shared-bias sign-flips ride. This cuts false-trust by ~70 % at rho=0.5,
+  ~62 % at 0.6, ~52 % at 0.7, and 41 % at rho = 0.8, lowers gradient error well below the plain gate, and stays cheap
   at rho = 0 — restoring safety exactly in the regime where the plain gate is silently defeated.
 - **Cost.** The per-component gate adds ~0.2 solver calls/trial at rho = 0 and ~0.6 at rho = 0.8
   (out of K = 6) — far cheaper than the global gate's blanket deferral, and tunable via the
