@@ -48,84 +48,91 @@ apply_style()
 
 # fig_method: device stack (a) + PINN I/O schematic (b). no data file, drawn from scratch.
 def make_method():
-    fig, (a, b) = plt.subplots(1, 2, figsize=(10, 3.9))
+    fig, (a, b) = plt.subplots(1, 2, figsize=(10.4, 4.2),
+                               gridspec_kw={'width_ratios': [1.0, 1.08]})
 
-    # (a) FPC device stack
+    # (a) FPC device stack -------------------------------------------------
     a.set_xlim(0, 10); a.set_ylim(0, 10); a.axis('off')
-    x0, w = 1.4, 7.2
+    x0, w = 1.1, 6.2
     layers = [
-        (0.6, 0.7, NEU,      'ground plane'),
-        (1.3, 1.6, '#cdb892', 'FR4 substrate ($\\varepsilon_r$)'),
-        (2.9, 2.3, '#dfe9f3', 'air cavity'),
+        (0.8, 0.55, NEU,       'ground plane',                   NEU),
+        (1.35, 1.5, '#d9c3a0', 'FR4 substrate ($\\varepsilon_r=4.4$)', NEU),
+        (2.85, 2.4, '#e6eef7', 'air cavity',                     NEU),
     ]
-    for y, h, c, lab in layers:
+    for y, h, c, lab, lc in layers:
         a.add_patch(Rectangle((x0, y), w, h, facecolor=c, edgecolor=NEU, lw=1.0))
-        a.text(x0 + w + 0.25, y + h / 2, lab, va='center', ha='left', fontsize=9)
-    # coded 96-cell superstrate (cell size encodes code g_k)
-    ytop = 5.7
+    # coded metasurface cells (heights encode the per-cell code g_k)
+    ytop = 5.35
     ncell = 12
-    rng = np.linspace(0, 1, ncell)
     cw = w / ncell
-    for i in range(ncell):
-        ch = 0.45 + 0.55 * (0.5 + 0.5 * np.sin(rng[i] * np.pi * 1.4))
-        cx = x0 + i * cw + cw * 0.12
-        a.add_patch(Rectangle((cx, ytop), cw * 0.76, ch,
-                              facecolor=SIG, edgecolor='white', lw=0.6, alpha=0.92))
-    a.text(x0 + w + 0.25, ytop + 0.45,
-           'coded 96-cell\nmetasurface ($g_k$)', va='center', ha='left', fontsize=9)
+    hs = 0.40 + 0.50 * (0.5 + 0.5 * np.sin(np.linspace(0, 1, ncell) * np.pi * 1.4))
+    for i, hh in enumerate(hs):
+        cx = x0 + i * cw + cw * 0.14
+        a.add_patch(Rectangle((cx, ytop), cw * 0.72, hh,
+                              facecolor=SIG, edgecolor='white', lw=0.5))
+
+    def leader(yc, text, color=NEU):
+        a.plot([x0 + w + 0.1, x0 + w + 0.45], [yc, yc], color='#aaaaaa', lw=0.6)
+        a.text(x0 + w + 0.55, yc, text, va='center', ha='left', fontsize=8.6, color=color)
+    leader(0.8 + 0.275, 'ground plane')
+    leader(1.35 + 0.75, 'FR4 substrate ($\\varepsilon_r=4.4$)')
+    leader(2.85 + 1.2, 'air cavity')
+    leader(ytop + 0.55, 'coded 96-cell\nmetasurface ($g_k$)', SIG)
     # probe feed
-    a.add_patch(Rectangle((x0 + w * 0.5 - 0.05, 0.0), 0.10, 1.3,
-                          facecolor=ACC, edgecolor=ACC))
-    a.annotate('probe feed', xy=(x0 + w * 0.5, 0.15), xytext=(x0 + w * 0.5 - 2.3, 0.2),
-               fontsize=9, color=ACC, va='center',
+    xf = x0 + w * 0.5
+    a.add_patch(Rectangle((xf - 0.045, 0.0), 0.09, 1.35, facecolor=ACC, edgecolor=ACC))
+    a.annotate('probe feed', xy=(xf - 0.05, 0.55), xytext=(x0 - 0.15, 0.55),
+               fontsize=8.6, color=ACC, va='center', ha='right',
                arrowprops=dict(arrowstyle='->', color=ACC, lw=1.0))
     # broadside radiation arrow
-    a.annotate('', xy=(x0 + w * 0.5, 9.3), xytext=(x0 + w * 0.5, 6.7),
-               arrowprops=dict(arrowstyle='-|>', color=NEU, lw=1.6))
-    a.text(x0 + w * 0.5 + 0.3, 8.6, 'broadside', fontsize=9, color=NEU)
-    panel_label(a, '(a)', x=0.0, y=0.97)
+    a.annotate('', xy=(xf, 9.5), xytext=(xf, 6.7),
+               arrowprops=dict(arrowstyle='-|>', color=NEU, lw=1.9))
+    a.text(xf + 0.28, 8.2, 'broadside', fontsize=8.8, color=NEU, va='center')
+    panel_label(a, '(a)', x=0.0, y=0.99)
 
-    # (b) geometry-conditioned PINN I/O schematic
+    # (b) geometry-conditioned PINN I/O schematic --------------------------
     b.set_xlim(0, 10); b.set_ylim(0, 10); b.axis('off')
-    # inputs
     inputs = ['$x$', '$y$', '$z$', '$f$', '$g$']
-    iy = np.linspace(8.2, 1.8, len(inputs))
+    iy = np.linspace(7.7, 2.3, len(inputs))
     for s, y in zip(inputs, iy):
-        b.add_patch(FancyBboxPatch((0.3, y - 0.45), 1.3, 0.9,
-                    boxstyle='round,pad=0.02,rounding_size=0.12',
+        b.add_patch(FancyBboxPatch((0.5, y - 0.36), 0.95, 0.72,
+                    boxstyle='round,pad=0.02,rounding_size=0.1',
                     facecolor='#eef3f9', edgecolor=SIG, lw=1.0))
-        b.text(0.95, y, s, ha='center', va='center', fontsize=11)
-    # network box
-    b.add_patch(FancyBboxPatch((3.5, 2.5), 3.0, 5.0,
-                boxstyle='round,pad=0.05,rounding_size=0.2',
-                facecolor='#f6f6f6', edgecolor=NEU, lw=1.2))
-    b.text(5.0, 6.6, 'geometry-\nconditioned', ha='center', va='center',
-           fontsize=9.5, color=NEU)
-    b.text(5.0, 5.0, 'PINN', ha='center', va='center', fontsize=14, fontweight='bold')
-    b.text(5.0, 3.6, r'$\Theta$', ha='center', va='center', fontsize=12, color=SIG)
-    # input arrows
+        b.text(0.975, y, s, ha='center', va='center', fontsize=11)
+    b.text(0.975, 8.55, 'inputs', ha='center', fontsize=8.2, color='#777')
+    # collect inputs onto a vertical bus, then a single arrow into the PINN
+    busx = 2.35
     for y in iy:
-        b.add_patch(FancyArrowPatch((1.7, y), (3.45, 5.0),
-                    arrowstyle='-', color='#bbbbbb', lw=0.8,
-                    connectionstyle='arc3,rad=0.0'))
-    # output
-    b.add_patch(FancyBboxPatch((7.6, 4.3), 2.1, 1.4,
+        b.add_patch(FancyArrowPatch((1.5, y), (busx, y), arrowstyle='-',
+                    color='#cccccc', lw=0.8))
+    b.add_patch(FancyArrowPatch((busx, iy.min()), (busx, iy.max()),
+                arrowstyle='-', color='#cccccc', lw=0.8))
+    b.add_patch(FancyArrowPatch((busx, 5.0), (3.42, 5.0),
+                arrowstyle='-|>', color=NEU, lw=1.4))
+    # network box
+    b.add_patch(FancyBboxPatch((3.5, 3.0), 3.0, 4.0,
+                boxstyle='round,pad=0.05,rounding_size=0.18',
+                facecolor='#f5f5f5', edgecolor=NEU, lw=1.3))
+    b.text(5.0, 6.15, 'geometry-\nconditioned', ha='center', va='center',
+           fontsize=9, color='#555555')
+    b.text(5.0, 5.0, 'PINN', ha='center', va='center', fontsize=15, fontweight='bold')
+    b.text(5.0, 3.85, r'$\Theta$', ha='center', va='center', fontsize=12, color=SIG)
+    # field output
+    b.add_patch(FancyBboxPatch((7.4, 5.25), 2.35, 1.2,
                 boxstyle='round,pad=0.03,rounding_size=0.12',
                 facecolor='#eef3f9', edgecolor=SIG, lw=1.0))
-    b.text(8.65, 5.0, r'$\mathbf{E}(x,y,z,f;g)$', ha='center', va='center', fontsize=9.5)
-    b.add_patch(FancyArrowPatch((6.55, 5.0), (7.55, 5.0),
-                arrowstyle='-|>', color=NEU, lw=1.4))
+    b.text(8.575, 5.85, r'$\mathbf{E}(x,y,z,f;g)$', ha='center', va='center', fontsize=9.5)
+    b.add_patch(FancyArrowPatch((6.55, 5.6), (7.35, 5.85), arrowstyle='-|>', color=NEU, lw=1.4))
     # autodiff gradient output
-    b.add_patch(FancyBboxPatch((7.6, 1.9), 2.1, 1.3,
+    b.add_patch(FancyBboxPatch((7.4, 2.65), 2.35, 1.2,
                 boxstyle='round,pad=0.03,rounding_size=0.12',
                 facecolor='#fbeceb', edgecolor=ACC, lw=1.0))
-    b.text(8.65, 2.55, r'$\partial\mathbf{E}/\partial g$', ha='center', va='center',
+    b.text(8.575, 3.25, r'$\partial\mathbf{E}/\partial g$', ha='center', va='center',
            fontsize=11, color=ACC)
-    b.add_patch(FancyArrowPatch((6.5, 3.4), (7.55, 2.55),
-                arrowstyle='-|>', color=ACC, lw=1.4))
-    b.text(7.0, 2.0, 'autodiff\n(one backward pass)', ha='center', va='center',
-           fontsize=8, color=ACC)
-    panel_label(b, '(b)', x=0.0, y=0.97)
+    b.add_patch(FancyArrowPatch((6.55, 4.4), (7.35, 3.25), arrowstyle='-|>', color=ACC, lw=1.4))
+    b.text(8.575, 2.25, 'autodiff (one backward pass)', ha='center', va='top',
+           fontsize=7.4, color=ACC)
+    panel_label(b, '(b)', x=0.0, y=0.99)
 
     save(fig, 'fig_method')
     print('fig_method: schematic (no data file); device stack + PINN I/O')
@@ -168,7 +175,8 @@ def make_forward():
     b.legend(handles=[mpatches.Patch(color=NEU, label='uniform'),
                       mpatches.Patch(color=SIG, label='phase-gradient codes'),
                       mpatches.Patch(color=ACC, label='surrogate codes')],
-             fontsize=8, frameon=False, loc='lower right')
+             fontsize=8, frameon=False, loc='lower center',
+             bbox_to_anchor=(0.5, 1.0), ncol=3, columnspacing=1.3, handletextpad=0.4)
     b.set_xticks(range(len(order)))
     b.set_xticklabels([str(i + 1) for i in range(len(order))], fontsize=9)
     b.set_xlabel('re-coding index')
@@ -194,7 +202,8 @@ def make_jacobian():
     a.set_yscale('log')
     a.set_xticks(x); a.set_xticklabels([f'seed {int(s)}' for s in seeds])
     a.set_ylabel(r'$\Vert J\Vert$')
-    a.legend(frameon=False, fontsize=8.5)
+    a.legend(frameon=False, fontsize=8.5, loc='lower center',
+             bbox_to_anchor=(0.5, 1.0), ncol=2, columnspacing=1.5, handletextpad=0.4)
     a.grid(alpha=0.25, axis='y', which='both')
     a.text(0.03, 0.92, f'ratio {ms["ratio"].mean():.0f}$\\times$ (mean over seeds)',
            transform=a.transAxes, fontsize=9, color=SIG)

@@ -26,7 +26,7 @@ a.set_xticks(np.arange(K)); a.set_xticklabels([f'$g_{{{k}}}$' for k in range(K)]
 a.set_ylim(0.45, 1.05); a.set_ylabel('ensemble sign-agreement (10 seeds)'); a.set_xlabel('design-parameter component')
 from matplotlib.patches import Patch
 a.legend(handles=[Patch(fc=GRN, ec='k', label='trusted (used in step)'), Patch(fc=ACC, ec='k', label='distrusted (dropped)')],
-         frameon=False, fontsize=7.8, loc='lower center')
+         frameon=False, fontsize=7.8, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
 a.set_title('(a) gate drops seed-unstable components', loc='left', fontsize=9.3, fontweight='bold')
 
 # (b) oracle-verified objective after the step: ensemble gate vs single-model
@@ -38,6 +38,7 @@ b.scatter([0], [Lg], s=120, marker='D', c=GRN, edgecolors='k', linewidths=0.6, z
 b.axhline(L0, color=NEU, ls=':', lw=1.2); b.text(1.45, L0 * 1.05, 'start', ha='right', va='bottom', fontsize=8, color=NEU)
 b.set_yscale('log'); b.set_xlim(-0.5, 1.5); b.set_xticks([0, 1]); b.set_xticklabels(['ensemble\ngate', 'single\nmodel'])
 b.set_ylabel('oracle-verified objective $L$ (optimum $=0$)')
+_yl = b.get_ylim(); b.set_ylim(_yl[0], _yl[1] * 2.6)   # headroom so the title clears the top point
 b.legend(frameon=False, fontsize=7.8, loc='lower left')
 b.set_title('(b) gate reliable; single-model erratic', loc='left', fontsize=9.3, fontweight='bold')
 
