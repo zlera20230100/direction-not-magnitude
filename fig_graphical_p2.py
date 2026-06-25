@@ -156,16 +156,14 @@ ax.add_patch(FancyBboxPatch((hx - 0.5, ny - 7.0), 38.0, 9.6,
 ax.text(hx + 0.6, ny + 1.0, 'AUC ', ha='left', va='center', fontsize=12, color=NEU)
 ax.text(hx + 5.2, ny + 1.0, '0.91', ha='left', va='center',
         fontsize=15, fontweight='bold', color=GRN)
-ax.text(hx + 9.6, ny + 1.0, 'predicting the full-wave verdict',
+ax.text(hx + 9.6, ny + 1.0, 'predicting gradient sign-correctness',
         ha='left', va='center', fontsize=9.6, color=NEU)
 ax.text(hx + 9.6, ny - 1.0, 'on an external transfer-matrix benchmark',
         ha='left', va='center', fontsize=8.6, color='#777777', style='italic')
 
-ax.text(hx + 0.6, ny - 4.0, '2 vs 11', ha='left', va='center',
-        fontsize=15, fontweight='bold', color=SIG)
-ax.text(hx + 10.8, ny - 4.0, 'FD checks to catch the', ha='left', va='center',
-        fontsize=9.2, color=NEU)
-ax.text(hx + 10.8, ny - 5.9, r'sign-wrong gradients (gate vs $|\nabla|$)',
+ax.text(hx + 0.6, ny - 4.0, 'trusts impedance, rejects radiation',
+        ha='left', va='center', fontsize=10.5, fontweight='bold', color=GRN)
+ax.text(hx + 0.6, ny - 5.9, 'the seed-unstable direction that fools MC-dropout',
         ha='left', va='center', fontsize=8.4, color='#777777', style='italic')
 
 # ============================ stage-to-stage arrows ============================
