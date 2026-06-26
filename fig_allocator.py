@@ -35,7 +35,7 @@ ax.plot(Bs, err_rand, '-s', color=ACC, ms=5, lw=1.6, zorder=3, label='random ord
 keep = np.concatenate([[True], np.abs(np.diff(gcost)) > 1e-9])
 ax.plot(gcost[keep], gerr[keep], ':D', color=SIG, ms=5.5, lw=1.4, zorder=4,
         label='fixed-$\\tau$ threshold gate (variable budget)')
-ax.plot(Bs, err_rank, '-o', color=GRN, ms=6, lw=2.2, zorder=5, label='rank-and-allocate (new)')
+ax.plot(Bs, err_rank, '-o', color=GRN, ms=6, lw=2.2, zorder=5, label='rank-and-allocate (proposed)')
 ax.plot(Bs, err_orac, '--*', color='0.30', ms=9, lw=1.4, zorder=4, label='oracle (lower bound)')
 
 # mark the gate's realized operating point and its budget spread (the thing the allocator fixes)

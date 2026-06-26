@@ -54,7 +54,7 @@ a.plot(fpr_t, tpr_t, '-', color=SIG, lw=2.3, zorder=3, solid_capstyle='round',
        label=f'resonance (TMM): AUC {auc_t:.3f}')
 a.fill_between(fpr_p, tpr_p, color=GRN, alpha=0.10, zorder=1)
 a.plot(fpr_p, tpr_p, '-', color=GRN, lw=2.3, zorder=4, solid_capstyle='round',
-       label=f'diffusion (heat, new): AUC {auc_p:.3f}')
+       label=f'diffusion (heat): AUC {auc_p:.3f}')
 # operating point on the diffusion ROC at the trust threshold tau
 j = int(np.argmin(np.abs(thr_p - tau)))
 a.plot(fpr_p[j], tpr_p[j], 'o', ms=7.5, mfc='white', mec=GRN, mew=1.8, zorder=5)
@@ -67,7 +67,7 @@ a.set_title('(a) the ranking generalises to diffusion, weaker than resonance',
             loc='left', fontsize=9.0, fontweight='bold')
 
 # ---- (b) per-domain AUC with bootstrap CI ---------------------------------------------------
-labels = ['diffusion\n(heat, new)', 'resonance\n(TMM)']
+labels = ['diffusion\n(heat)', 'resonance\n(TMM)']
 aucs = [auc_p, auc_t]; los = [lo_p, lo_t]; his = [hi_p, hi_t]; cols = [GRN, SIG]
 xb = np.arange(2)
 b.bar(xb, aucs, color=cols, edgecolor='k', lw=0.6, width=0.58, zorder=3)
