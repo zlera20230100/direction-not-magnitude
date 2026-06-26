@@ -42,21 +42,21 @@ ax.plot(Bs, err_orac, '--*', color='0.30', ms=9, lw=1.4, zorder=4, label='oracle
 ax.errorbar([op_c], [op_e], xerr=[[op_cstd], [op_cstd]], fmt='none', ecolor=SIG, elinewidth=1.4,
             capsize=4, zorder=6, alpha=0.9)
 ax.annotate(f'gate @ $\\tau={tau}$: budget\nmean {op_c:.2f}, std {op_cstd:.2f}\n(uncontrolled)',
-            xy=(op_c, op_e), xytext=(3.05, 0.255), fontsize=8.0, color=SIG, ha='left',
-            arrowprops=dict(arrowstyle='->', color=SIG, lw=1.0,
-                            connectionstyle='arc3,rad=-0.2'))
+            xy=(op_c, op_e), xytext=(0.1, 0.15), fontsize=8.0, color=SIG, ha='left', va='top',
+            arrowprops=dict(arrowstyle='->', color=SIG, lw=1.1,
+                            connectionstyle='arc3,rad=0.0'))
 
 ax.set_xlabel('full-wave (FD) solves spent,  $B$  (of %d components)' % K)
 ax.set_ylabel('relative gradient error  $\\|g-a\\|/\\|a\\|$')
 ax.set_xlim(-0.15, K + 0.15); ax.set_ylim(-0.02, 0.55)
 ax.set_xticks(range(0, K + 1))
 ax.legend(loc='upper right', frameon=False, fontsize=8.2)
-ax.text(0.03, 0.04,
+ax.text(0.975, 0.66,
         f'rank-allocate: {area_vs_random:.0f}% smaller frontier area than random;\n'
         f'closes $\\sim${gap_closed:.0f}% of the gap to the oracle.\n'
         f'the threshold gate is its variable-budget special case\n'
         f'(equal at matched budget) $\\Rightarrow$ added value = controllability.',
-        transform=ax.transAxes, fontsize=8.0, va='bottom', ha='left', color='0.2',
+        transform=ax.transAxes, fontsize=7.5, va='top', ha='right', color='0.2',
         bbox=dict(boxstyle='round,pad=0.4', fc='#eef6f0', ec=GRN, lw=0.7))
 ax.set_title('Rank-and-allocate exposes a controllable cost-accuracy frontier',
              loc='left', fontsize=9.6, fontweight='bold')

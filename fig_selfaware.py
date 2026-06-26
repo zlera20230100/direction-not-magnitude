@@ -39,13 +39,16 @@ a.plot(rho, ft_global, '-^', color=ORG, ms=5.5, lw=1.6, zorder=3,
 a.plot(rho, ft_percomp, '-o', color=GRN, ms=5, lw=2.0, zorder=5,
        label='per-component self-aware gate')
 # annotate the worst-case rho-wall point and the restored point
-a.annotate(f'{ft_plain[-1]:.3f}', xy=(rho[-1], ft_plain[-1]), xytext=(rho[-1]-0.02, ft_plain[-1]+0.006),
-           ha='right', va='bottom', fontsize=8.0, color=ACC)
-a.annotate(f'{ft_percomp[-1]:.3f}', xy=(rho[-1], ft_percomp[-1]), xytext=(rho[-1]-0.02, ft_percomp[-1]-0.002),
-           ha='right', va='top', fontsize=8.0, color=GRN)
+# value labels for ALL three endpoints, parked just RIGHT of rho=0.8 (colour-matched, no overlap)
+a.annotate(f'{ft_global[-1]:.3f}', xy=(rho[-1], ft_global[-1]), xytext=(rho[-1]+0.012, ft_global[-1]),
+           ha='left', va='center', fontsize=8.0, color=ORG)
+a.annotate(f'{ft_plain[-1]:.3f}', xy=(rho[-1], ft_plain[-1]), xytext=(rho[-1]+0.012, ft_plain[-1]),
+           ha='left', va='center', fontsize=8.0, color=ACC)
+a.annotate(f'{ft_percomp[-1]:.3f}', xy=(rho[-1], ft_percomp[-1]), xytext=(rho[-1]+0.012, ft_percomp[-1]),
+           ha='left', va='center', fontsize=8.0, color=GRN)
 a.set_xlabel('shared-bias fraction $\\rho$  (seed-correlation / ICC)')
 a.set_ylabel('false-trust rate  $P(\\mathrm{sign\\,wrong}\\mid\\mathrm{certified})$')
-a.set_xlim(-0.02, 0.82); a.set_ylim(-0.004, 0.115)
+a.set_xlim(-0.02, 0.88); a.set_ylim(-0.004, 0.118)
 a.legend(loc='upper left', frameon=False, fontsize=8.0)
 a.text(0.04, 0.62,
        f'per-component cuts false trust\n$\\sim${red_med:.0f}% across $\\rho=0.5$-$0.7$',
