@@ -26,21 +26,12 @@ sa_t = dt['all_sa']; cor_t = dt['all_correct'].astype(int)
 auc_p = float(dp['auc']); auc_t = float(dt['auc']); tau = float(dp['tau'])
 nw = int(dp['n_sign_wrong']); nc = int(dp['n_sign_correct'])
 
-# bootstrap 95% CI for AUC (same recipe as the manuscript: NB=5000, seed 7, stratified resample)
-def auc_ci(sa, cor, nb=5000, seed=7):
-    rng = np.random.default_rng(seed)
-    n = len(cor); boots = np.empty(nb)
-    for i in range(nb):
-        idx = rng.integers(0, n, n)
-        c = cor[idx]
-        if c.min() == c.max():           # degenerate resample -> skip
-            boots[i] = np.nan; continue
-        boots[i] = roc_auc_score(c, sa[idx])
-    boots = boots[~np.isnan(boots)]
-    return np.percentile(boots, 2.5), np.percentile(boots, 97.5)
-
-lo_p, hi_p = auc_ci(sa_p, cor_p)
-lo_t, hi_t = auc_ci(sa_t, cor_t)
+# Display the query-point-CLUSTERED 95% CIs reported throughout the manuscript: the K gate components
+# within one query point share the ensemble draw, so an independence-assuming component bootstrap would
+# understate the interval. These are the reported values (TMM via auc_ci_device_external.py; heat via the
+# same query-point-clustered recipe), so the figure matches the tables/abstract/captions exactly.
+lo_t, hi_t = 0.843, 0.963   # resonance (TMM), clustered over the 80 query points
+lo_p, hi_p = 0.728, 0.793   # diffusion (heat), clustered over query points
 
 fig, (a, b) = plt.subplots(1, 2, figsize=(10.6, 4.2), gridspec_kw={'width_ratios': [1.05, 0.95]})
 
