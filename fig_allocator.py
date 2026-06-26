@@ -55,7 +55,7 @@ ax.text(0.03, 0.04,
         f'rank-allocate: {area_vs_random:.0f}% smaller frontier area than random;\n'
         f'closes $\\sim${gap_closed:.0f}% of the gap to the oracle.\n'
         f'the threshold gate is its variable-budget special case\n'
-        f'(equal at matched budget) $\\Rightarrow$ new value = controllability.',
+        f'(equal at matched budget) $\\Rightarrow$ added value = controllability.',
         transform=ax.transAxes, fontsize=8.0, va='bottom', ha='left', color='0.2',
         bbox=dict(boxstyle='round,pad=0.4', fc='#eef6f0', ec=GRN, lw=0.7))
 ax.set_title('Rank-and-allocate exposes a controllable cost-accuracy frontier',
