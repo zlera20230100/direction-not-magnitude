@@ -2,7 +2,7 @@
 # ============================================================================
 # Correlated-seed-aware ("self-aware") reliability gate.
 #
-# Paper-2 context. The reliability-gated hybrid gradient certifies a component k
+# The reliability-gated hybrid gradient certifies a component k
 # (uses the cheap autodiff ensemble mean instead of a solver call) when the
 # across-seed SIGN-AGREEMENT sa_k = max(frac(+), frac(-)) >= tau. This silently
 # fails under a SHARED (seed-correlated) bias: a common bias term that is

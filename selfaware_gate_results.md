@@ -1,6 +1,6 @@
 # Correlated-seed-aware ("self-aware") gate — results & honest verdict
 
-**Scope.** Paper-2 (Neurocomputing) revision experiment. Goal: turn the reliability gate's
+**Scope.** Neurocomputing revision experiment. Goal: turn the reliability gate's
 biggest weakness — it is silently defeated by correlated / shared-seed bias near rho ≈ 0.7
 (the Devil's-Advocate exploit) — into a *detected, handled* case. Synthetic only; reuses the
 shared-bias data model of `shared_bias_sweep.py` / `hybrid_robust.py`. No manuscript or git

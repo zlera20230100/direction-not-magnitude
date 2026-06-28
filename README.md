@@ -1,4 +1,4 @@
-# Reproducibility repository — Paper 2
+# Reproducibility code and data
 
 **Direction, Not Magnitude: A Portable, Solver-Free Reliability Gate for Differentiable-Surrogate Design Gradients**
 
@@ -27,7 +27,7 @@ Run scripts from inside this folder (they load their `.npz` inputs by relative n
 ## 2. Quick reproduction (figures from the provided data)
 
 ```bash
-python fig_unified_p2.py        # -> fig_method, fig_forward, fig_jacobian, fig_inert, fig_remedy
+python fig_unified.py        # -> fig_method, fig_forward, fig_jacobian, fig_inert, fig_remedy
 python fig_reliability.py        # -> fig_reliability
 python fig_reliability_calib.py  # -> fig_reliability_calib
 python fig_endtoend.py           # -> fig_endtoend
@@ -43,16 +43,16 @@ These read the frozen `.npz` files and write the PDF/PNG figures used in the man
 
 | Figure | Generator | Main data file(s) |
 |---|---|---|
-| Method / device | `fig_unified_p2.py` | `fpc_result.npz`, `hq_pattern.npz`, `movable.npz` |
-| Forward accuracy | `fig_unified_p2.py` | `fpc_result.npz`, `hq_pattern.npz` |
-| Gradient-reliability map | `fig_unified_p2.py` | `zones_multiseed.npz`, `grad_fullwave.npz` |
+| Method / device | `fig_unified.py` | `fpc_result.npz`, `hq_pattern.npz`, `movable.npz` |
+| Forward accuracy | `fig_unified.py` | `fpc_result.npz`, `hq_pattern.npz` |
+| Gradient-reliability map | `fig_unified.py` | `zones_multiseed.npz`, `grad_fullwave.npz` |
 | Reliability indicator | `fig_reliability.py` | `reliability.npz`, `mcdropout.npz`, `reliability_ci.npz` |
 | Calibration / ensemble size | `fig_reliability_calib.py` | `reliability_calib.npz` |
 | End-to-end safe step | `fig_endtoend.py` | `endtoend.npz` |
 | External benchmark (TMM) | `fig_extbench.py` | `extbench_tmm.npz` |
 | Cost-optimal hybrid gradient | `fig_hybrid_gradient.py` | `hybrid_gradient.npz` |
-| Operating boundary (inert) | `fig_unified_p2.py` | `movable.npz`, `closure_directive.npz` |
-| Resonance-wall remedies | `fig_unified_p2.py` | (values in script) |
+| Operating boundary (inert) | `fig_unified.py` | `movable.npz`, `closure_directive.npz` |
+| Resonance-wall remedies | `fig_unified.py` | (values in script) |
 
 ---
 

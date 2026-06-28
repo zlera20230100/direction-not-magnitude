@@ -174,7 +174,7 @@ anecdotal and exposes that the *choice of cheap score matters* (sign-agreement w
 ## 6. Reproduce
 
 ```bash
-cd <repo_paper2>
+cd <repo>
 set OMP_NUM_THREADS=6            # Windows; export on POSIX
 D:\ANACONDA\python.exe rank_allocator.py
 ```

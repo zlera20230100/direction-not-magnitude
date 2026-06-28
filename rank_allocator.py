@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Rank-and-allocate optimal solver-budget allocator (Paper 2 revision).
+# Rank-and-allocate optimal solver-budget allocator.
 #
 # Reviewer point: the current "allocator" is just a fixed threshold (trust every component with
 # sign-agreement >= tau), which gives a VARIABLE, uncontrolled number of full-wave finite-difference

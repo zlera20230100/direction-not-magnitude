@@ -32,7 +32,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import torch.nn as nn
 CODE = r"D:\实践三号“延安”\实践三号“延安”\代码"
 PAPER = r"D:\实践三号“延安”\论文"
-REPO  = os.path.dirname(os.path.abspath(__file__))   # repo_paper2 (npz inputs live here)
+REPO  = os.path.dirname(os.path.abspath(__file__))   # repository root (npz inputs live here)
 sys.path.insert(0, CODE); os.chdir(CODE)
 import logging; logging.disable(logging.INFO)
 from config import FREQUENCY, EXCITATION_CONFIG, Z_INTERFACE, device

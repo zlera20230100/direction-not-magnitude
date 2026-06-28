@@ -1,6 +1,6 @@
 # External benchmark #2 — gradient-reliability gate on a DIFFUSION (heat-conduction) BVP
 
-**Goal.** Test whether the deep-ensemble *sign-agreement* gate (Paper 2) generalises to a
+**Goal.** Test whether the deep-ensemble *sign-agreement* gate generalises to a
 **structurally different physics family**, beyond the resonant cases already in the manuscript:
 the data-free EM-PINN antenna (resonant Maxwell) and the external thin-film TMM bench
 (Fabry–Perot resonance). This second external benchmark is **elliptic diffusion**, not resonance.
@@ -83,7 +83,7 @@ gradients are already saturated-correct.
 1. **AUC generalises (above chance, with a tight, well-defined CI).** The sign-agreement gate
    predicts which autodiff gradient components are sign-correct with **AUC 0.761, 95 % CI
    [0.720, 0.802]** — lower bound well above chance (0.5), on a healthy 171-negative class. Mean
-   sign-agreement is clearly separated (0.944 correct vs 0.769 wrong). So the *core claim of Paper 2*
+   sign-agreement is clearly separated (0.944 correct vs 0.769 wrong). So the *core claim of this work*
    — sign-agreement carries real information about per-component gradient trust — **holds in a
    non-resonant, diffusion physics family.**
 
@@ -98,7 +98,7 @@ gradients are already saturated-correct.
    the descent-direction cosine — the base surrogate cosine is already 0.951. By contrast, on the
    resonance flank the sign-fragile components can also be high-leverage, so gate-ordered FD
    correction buys a larger cosine gain per solve. **The allocator's benefit is therefore physics-
-   dependent**, and Paper 2's "fewer solves" claim should be scoped to problems where unreliable
+   dependent**, and the work's "fewer solves" claim should be scoped to problems where unreliable
    components are also high-leverage (resonant/ill-conditioned regimes), not asserted as universal.
 
 **Bottom line for the manuscript:** the gradient-reliability gate is *cross-domain* in the sense

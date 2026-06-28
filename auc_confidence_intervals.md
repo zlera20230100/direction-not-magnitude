@@ -1,4 +1,4 @@
-# Paper 2 — AUC confidence intervals (deep-revision, computed from existing generators/data)
+# AUC confidence intervals (deep-revision, computed from existing generators/data)
 
 All bootstrap 95% CIs. Synthetic-spectrum AUCs use a CLUSTERED bootstrap (resample whole trials,
 each trial = one sigma across 6 correlated zones) to respect within-trial correlation.

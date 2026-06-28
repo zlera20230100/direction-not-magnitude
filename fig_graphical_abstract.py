@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Elsevier graphical abstract for Paper 2 -- HYBRID "AC": hero contrast (from variant A) over a
-# slim solver-free pipeline band (distilled from variant C).  One cohesive editorial banner.
+# Elsevier graphical abstract: a "same magnitude, opposite trust" hero contrast over a slim
+# solver-free pipeline band.  One cohesive editorial banner.
 #
 #   TITLE   : bold "Direction, not magnitude" + one-line subtitle.
 #   HERO    : "SAME MAGNITUDE, OPPOSITE TRUST" -- each design gradient drawn as a BUNDLE of M
@@ -356,14 +356,14 @@ ax.text(0.604, vy_line, 'rejects the seed-unstable radiation gradient',
         ha='left', va='center', fontsize=9.6, color=RED, fontweight='bold')
 
 # ============================================================ save
-out_pdf = os.path.join(DIR, 'fig_graphical_p2_AC.pdf')
-out_png = os.path.join(DIR, 'fig_graphical_p2_AC.png')
+out_pdf = os.path.join(DIR, 'fig_graphical_abstract.pdf')
+out_png = os.path.join(DIR, 'fig_graphical_abstract.png')
 fig.savefig(out_pdf)
 fig.savefig(out_png, dpi=150)
 plt.close(fig)
 try:
     from PIL import Image
     w, h = Image.open(out_png).size
-    print(f'fig_graphical_p2_AC (hybrid hero + pipeline): PNG {w}x{h} px -> {DIR}')
+    print(f'fig_graphical_abstract (hybrid hero + pipeline): PNG {w}x{h} px -> {DIR}')
 except Exception:
-    print('fig_graphical_p2_AC: written')
+    print('fig_graphical_abstract: written')
