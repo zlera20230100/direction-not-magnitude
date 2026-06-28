@@ -7,6 +7,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import numpy as np
 import matplotlib as mpl; mpl.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.transforms import offset_copy
 mpl.rcParams.update({'font.family': 'serif', 'font.serif': ['Times New Roman'], 'mathtext.fontset': 'stix',
     'pdf.fonttype': 42, 'ps.fonttype': 42, 'axes.spines.top': False, 'axes.spines.right': False,
     'axes.labelsize': 10.5, 'xtick.labelsize': 9.5, 'ytick.labelsize': 9.5, 'legend.fontsize': 8.5, 'axes.linewidth': 0.9})
@@ -21,7 +22,9 @@ fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.9), gridspec_kw={'width_ratios'
 # (a) per-component ensemble sign-agreement; gate drops the seed-unstable ones
 cols = [GRN if t else ACC for t in trust]
 a.bar(np.arange(K), sa, color=cols, edgecolor='k', lw=0.6, width=0.66)
-a.axhline(tau, color='0.4', ls='--', lw=1.0); a.text(K - 0.5, tau + 0.008, f'trust threshold {tau:.1f}', ha='right', va='bottom', fontsize=7.8, color='0.3')
+a.axhline(tau, color='#404040', ls=(0, (5, 4)), lw=1.4)
+_tra = offset_copy(a.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+a.text(1.0, tau, rf'gate threshold $\tau={tau:.1f}$', transform=_tra, ha='right', va='bottom', fontsize=7.6, color='#404040', style='italic')
 a.set_xticks(np.arange(K)); a.set_xticklabels([f'$g_{{{k}}}$' for k in range(K)])
 a.set_ylim(0.45, 1.05); a.set_ylabel('ensemble sign-agreement (10 seeds)'); a.set_xlabel('design-parameter component')
 from matplotlib.patches import Patch
@@ -32,11 +35,13 @@ a.set_title('(a) gate drops seed-unstable components', loc='left', fontsize=9.3,
 # (b) oracle-verified objective after the step: ensemble gate vs single-model
 a.set_axisbelow(True)
 xb = 1 + 0.12 * rng.standard_normal(len(Ln))
-b.scatter(xb, Ln, s=42, c=ACC, edgecolors='k', linewidths=0.4, zorder=3, label='naive: single-model step ($\\times$10)')
+b.scatter(xb, Ln, s=70, c=ACC, edgecolors='k', linewidths=0.5, zorder=3, label='naive: single-model step ($\\times$10)')
 _m = float(Ln.mean()); b.plot([1 - 0.22, 1 + 0.22], [_m, _m], '-', color='#7d1f17', lw=2.8, zorder=5, solid_capstyle='round')
 b.text(1 + 0.27, _m, 'mean', va='center', ha='left', fontsize=7.6, color='#7d1f17')
-b.scatter([0], [Lg], s=120, marker='D', c=GRN, edgecolors='k', linewidths=0.6, zorder=4, label='ensemble gate step')
-b.axhline(L0, color=NEU, ls=':', lw=1.2); b.text(1.45, L0 * 1.05, 'start', ha='right', va='bottom', fontsize=8, color=NEU)
+b.scatter([0], [Lg], s=70, marker='D', c=GRN, edgecolors='k', linewidths=0.5, zorder=4, label='ensemble gate step')
+b.axhline(L0, color='#404040', ls=(0, (5, 4)), lw=1.4)
+_trb = offset_copy(b.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+b.text(1.0, L0, 'starting objective', transform=_trb, ha='right', va='bottom', fontsize=7.6, color='#404040', style='italic')
 b.set_yscale('log'); b.set_xlim(-0.5, 1.5); b.set_xticks([0, 1]); b.set_xticklabels(['ensemble\ngate', 'single\nmodel'])
 b.set_ylabel('oracle-verified objective $L$ (optimum $=0$)')
 _yl = b.get_ylim(); b.set_ylim(_yl[0], _yl[1] * 2.6)   # headroom so the title clears the top point

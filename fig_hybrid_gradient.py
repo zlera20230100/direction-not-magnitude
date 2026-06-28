@@ -9,10 +9,11 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import numpy as np
 import matplotlib as mpl; mpl.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.transforms import offset_copy
 mpl.rcParams.update({'font.family': 'serif', 'font.serif': ['Times New Roman'], 'mathtext.fontset': 'stix',
     'pdf.fonttype': 42, 'ps.fonttype': 42, 'axes.spines.top': False, 'axes.spines.right': False,
     'axes.labelsize': 10.5, 'xtick.labelsize': 9.5, 'ytick.labelsize': 9.5, 'legend.fontsize': 8.5, 'axes.linewidth': 0.9})
-DIR = os.path.dirname(os.path.abspath(__file__)); GRN = '#1e7a45'; ACC = '#c0392b'; SIG = '#1f5fa6'; ORG = '#e67e22'
+DIR = os.path.dirname(os.path.abspath(__file__)); GRN = '#1e7a45'; ACC = '#c0392b'; SIG = '#1f5fa6'; ORG = '#e67e22'; NEU = '#404040'
 d = np.load(os.path.join(DIR, 'hybrid_gradient.npz'))
 K = int(d['K']); tau = float(d['tau'])
 
@@ -34,8 +35,9 @@ a.scatter([float(d['op_cost'])], [float(d['op_err'])], marker='o', s=95, facecol
           linewidths=2.0, zorder=7, label=f'gate @ $\\tau={tau}$')
 a.annotate(f"{100*(1-float(d['op_cost'])/K):.0f}% fewer solves\nthan all-FD,\n"
            f"{float(d['err_allad'])/float(d['op_err']):.1f}$\\times$ lower error\nthan all-autodiff",
-           xy=(float(d['op_cost']), float(d['op_err'])), xytext=(2.7, 0.34), fontsize=8.2, color='0.2',
-           arrowprops=dict(arrowstyle='->', color='0.45', lw=1.0))
+           xy=(float(d['op_cost']), float(d['op_err'])), xytext=(3.05, 0.33), fontsize=8.2, color='0.2',
+           arrowprops=dict(arrowstyle='->', color='0.45', lw=1.0,
+                           shrinkA=2, shrinkB=4, connectionstyle='arc3,rad=-0.12'))
 a.set_xlabel('full-wave FD solves spent (of %d components)' % K)
 a.set_ylabel('relative error of the design gradient')
 a.set_xlim(-0.3, K + 0.3); a.set_ylim(-0.03, 0.58)
@@ -47,13 +49,16 @@ sa = d['dev_sign_agree']; trust = d['dev_trust']
 x = np.arange(1, K + 1)
 cols = [GRN if t else ACC for t in trust]
 b.bar(x, sa, color=cols, edgecolor='k', linewidth=0.5, width=0.66, zorder=3)
-b.axhline(tau, color='0.4', ls='--', lw=1.1, zorder=2)
-b.text(K + 0.5, tau + 0.008, f'trust threshold {tau}', ha='right', va='bottom', fontsize=7.8, color='0.3')
+b.axhline(tau, color=NEU, ls=(0, (5, 4)), lw=1.4, zorder=2)
+# unified ref-line label v2: hug the dashed line, right-aligned, ~half a char above
+_tr = offset_copy(b.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+b.text(1.0, tau, f'trust threshold {tau}', transform=_tr, ha='right', va='bottom',
+       fontsize=7.6, color=NEU, style='italic')
 b.set_xticks(x); b.set_xticklabels([f'z{i}' for i in x])
 b.set_xlabel('radiation zone (real 24-GHz FPC)')
 b.set_ylabel('ensemble sign-agreement (10 seeds)')
 b.set_ylim(0.45, 1.12)
-b.text(0.03, 0.93,
+b.text(0.025, 0.885,
        f"all {K}/{K} zones < threshold $\\Rightarrow$ FD on all\n"
        f"naive autodiff shortcut: only {int(d['dev_signmatch'])}/{K} signs correct,\n"
        f"{float(d['dev_naive_relerr']):.1f}$\\times$ the full-wave magnitude\n"

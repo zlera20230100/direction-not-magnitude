@@ -30,24 +30,26 @@ groups = [('responsive\n(reliable)', d['sa_resp'], GRN),
           ('null\n(unreliable)', d['sa_null'], SIG),
           ('real radiation\n(unreliable)', d['sa_rad'], ACC)]
 for i, (lab, vals, col) in enumerate(groups):
-    a.scatter(i + 0.09 * rng.standard_normal(len(vals)), vals, s=34, c=col, edgecolors='k',
-              linewidths=0.4, zorder=3, alpha=0.85)
-    # colour-matched group mean as a thick bar with a thin black outline so it reads against same-colour dots
-    a.plot([i - 0.22, i + 0.22], [vals.mean(), vals.mean()], color=col, lw=3.2, solid_capstyle='round',
-           zorder=6, path_effects=[pe.Stroke(linewidth=5.0, foreground='k'), pe.Normal()])
-a.axhline(thr, color='0.45', ls='--', lw=1.0, zorder=1)
-a.text(2.54, thr + 0.006, f'trust threshold {thr:.1f}', ha='right', va='bottom', fontsize=7.8, color='0.35')
+    a.scatter(i + 0.09 * rng.standard_normal(len(vals)), vals, s=46, c=col, edgecolors='k',
+              linewidths=0.4, zorder=7, alpha=0.9)
+    # colour-matched group mean as a (thinner) black-outlined bar; data dots sit on top so they stay visible
+    a.plot([i - 0.22, i + 0.22], [vals.mean(), vals.mean()], color=col, lw=2.0, solid_capstyle='round',
+           zorder=6, path_effects=[pe.Stroke(linewidth=3.2, foreground='k'), pe.Normal()])
+a.axhline(thr, color='#404040', ls=(0, (5, 4)), lw=1.4, zorder=1)
+from matplotlib.transforms import offset_copy
+_tra = offset_copy(a.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+a.text(1.0, thr, f'trust threshold {thr:.1f}', transform=_tra, ha='right', va='bottom', fontsize=7.6, color='#404040', style='italic')
 xm = 2 + 0.09 * rng.standard_normal(len(mc['sa_mc']))
 a.scatter(xm, mc['sa_mc'], s=44, marker='^', c=ORG, edgecolors='k', linewidths=0.4, zorder=5)
-a.annotate('MC-dropout\n(1 model):\nfalse trust', xy=(1.93, 1.0), xytext=(1.5, 0.61),
-           fontsize=8.0, color=ORG, va='center', ha='center', fontweight='bold',
-           arrowprops=dict(arrowstyle='->', color=ORG, lw=1.2, connectionstyle='arc3,rad=0.12'))
+a.annotate('MC-dropout (1 model):\nfalse trust', xy=(2.12, 1.01), xytext=(2.66, 1.11),
+           fontsize=8.0, color=ORG, va='center', ha='right', fontweight='bold',
+           arrowprops=dict(arrowstyle='->', color=ORG, lw=1.2, connectionstyle='arc3,rad=0.2'))
 # state the group-mean convention ONCE (thick colour-matched, black-edged bars), not per-group
-mean_proxy = Line2D([0], [0], color='0.6', lw=3.2, solid_capstyle='round',
-                    path_effects=[pe.Stroke(linewidth=5.0, foreground='k'), pe.Normal()])
+mean_proxy = Line2D([0], [0], color='0.6', lw=2.0, solid_capstyle='round',
+                    path_effects=[pe.Stroke(linewidth=3.2, foreground='k'), pe.Normal()])
 a.legend([mean_proxy], ['group mean'], loc='lower left', frameon=False, fontsize=8.4, handlelength=1.7)
 a.set_xticks(range(3)); a.set_xticklabels([g[0] for g in groups], fontsize=8.8)
-a.set_xlim(-0.5, 2.7); a.set_ylim(0.45, 1.06)
+a.set_xlim(-0.5, 2.7); a.set_ylim(0.45, 1.18)
 a.set_ylabel('ensemble sign-agreement (10 seeds)')
 a.set_title('(a) cheap ensemble indicator separates reliable / unreliable', loc='left', fontsize=9.6, fontweight='bold')
 
@@ -61,9 +63,11 @@ b.errorbar(range(3), pts, yerr=[np.array(pts) - np.array(los), np.array(his) - n
            fmt='none', ecolor='k', elinewidth=1.0, capsize=4, zorder=5)
 for i, v in enumerate(pts):
     b.text(i, his[i] + 0.03, f'{v:.3f}', ha='center', va='bottom', fontsize=8.4)   # above CI cap, clear of error bar
-b.axhline(0.5, color=ACC, ls=':', lw=1.1, zorder=2)
-b.text(2.46, 0.52, 'chance', ha='right', va='bottom', fontsize=7.8, color=ACC)
+b.axhline(0.5, color='#404040', ls=(0, (5, 4)), lw=1.4, zorder=2)
+_trb = offset_copy(b.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+b.text(1.0, 0.5, 'chance', transform=_trb, ha='right', va='bottom', fontsize=7.6, color='#404040', style='italic')
 b.set_xticks(range(3)); b.set_xticklabels(names, fontsize=8.4)
+b.set_xlim(-0.6, 2.9)
 b.set_ylabel('reliability AUC  (95% CI, $n{=}18$)'); b.set_ylim(0.0, 1.2)
 b.set_title('(b) predicts the full-wave verdict, no solver', loc='left', fontsize=9.6, fontweight='bold')
 
@@ -73,7 +77,9 @@ for p in ps:
     dd = np.load(os.path.join(DIR, f'mcdropout_p{p:.2f}.npz')); sa_sweep.append(float(dd['sa_mc'].mean()))
 c.plot(ps, sa_sweep, 'o-', color=ORG, lw=1.9, ms=7, label='MC-dropout (1 model)')
 c.axhline(float(d['sa_rad'].mean()), color=GRN, ls='-', lw=1.8, label='deep ensemble (10 seeds)')
-c.axhline(thr, color='0.45', ls='--', lw=1.0); c.text(0.5, thr - 0.05, 'trust threshold', ha='right', fontsize=7.6, color='0.35')
+c.axhline(thr, color='#404040', ls=(0, (5, 4)), lw=1.4)
+_trc = offset_copy(c.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+c.text(1.0, thr, 'trust threshold', transform=_trc, ha='right', va='bottom', fontsize=7.6, color='#404040', style='italic')
 c.set_xscale('log'); c.set_xticks(ps); c.set_xticklabels([f'{p:g}' for p in ps])
 c.set_xlabel('MC-dropout rate $p$'); c.set_ylabel('radiation-gradient sign-agreement'); c.set_ylim(0.45, 1.05)
 c.legend(loc='center left', frameon=False, fontsize=8.0)

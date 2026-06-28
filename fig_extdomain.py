@@ -12,6 +12,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import numpy as np
 import matplotlib as mpl; mpl.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.transforms import offset_copy
 from sklearn.metrics import roc_curve, roc_auc_score
 mpl.rcParams.update({'font.family': 'serif', 'font.serif': ['Times New Roman'], 'mathtext.fontset': 'stix',
     'pdf.fonttype': 42, 'ps.fonttype': 42, 'axes.spines.top': False, 'axes.spines.right': False,
@@ -38,9 +39,9 @@ fig, (a, b) = plt.subplots(1, 2, figsize=(10.6, 4.2), gridspec_kw={'width_ratios
 # ---- (a) ROC: diffusion vs resonance --------------------------------------------------------
 fpr_t, tpr_t, _ = roc_curve(cor_t, sa_t)
 fpr_p, tpr_p, thr_p = roc_curve(cor_p, sa_p)
-a.plot([0, 1], [0, 1], '--', color='0.65', lw=1.0, zorder=2)
-a.text(0.78, 0.70, 'chance', rotation=45, rotation_mode='anchor', color='0.55', fontsize=8,
-       va='bottom', ha='center')
+a.plot([0, 1], [0, 1], color='#404040', linestyle=(0, (5, 4)), lw=1.4, zorder=2)
+# (the diagonal 'chance' label is added after tight_layout so its rotation matches the
+#  rendered y=x slope on the finalised axes -- identical recipe to Fig 8, see below)
 a.plot(fpr_t, tpr_t, '-', color=SIG, lw=2.3, zorder=3, solid_capstyle='round',
        label=f'resonance (TMM): AUC {auc_t:.3f}')
 a.fill_between(fpr_p, tpr_p, color=GRN, alpha=0.10, zorder=1)
@@ -66,8 +67,11 @@ b.errorbar(xb, aucs, yerr=[np.array(aucs) - np.array(los), np.array(his) - np.ar
            fmt='none', ecolor='k', elinewidth=1.1, capsize=5, zorder=5)
 for i, (v, lo, hi) in enumerate(zip(aucs, los, his)):
     b.text(i, hi + 0.02, f'{v:.3f}\n[{lo:.3f}, {hi:.3f}]', ha='center', va='bottom', fontsize=8.2)
-b.axhline(0.5, color=ACC, ls=':', lw=1.1, zorder=2)
-b.text(1.46, 0.515, 'chance', ha='right', va='bottom', fontsize=7.8, color=ACC)
+b.axhline(0.5, color='#404040', linestyle=(0, (5, 4)), lw=1.4, zorder=2)
+# horizontal guide-line convention: right-aligned, hugging the line ~3pt above (matches Fig 8)
+_trb = offset_copy(b.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+b.text(1.0, 0.5, 'chance', transform=_trb, ha='right', va='bottom', fontsize=7.6,
+       color='#404040', style='italic')
 b.set_xticks(xb); b.set_xticklabels(labels, fontsize=8.6)
 b.set_ylabel('reliability AUC  (sign-agreement $\\to$ sign-correct)')
 b.set_ylim(0.0, 1.15); b.set_xlim(-0.6, 1.6)
@@ -82,6 +86,19 @@ fig.text(0.74, -0.02,
          fontsize=7.6, va='top', ha='center', color='0.3')
 
 fig.tight_layout()
+
+# diagonal ref-line label: rotate to match the rendered y=x slope, sit just below it,
+# ~half-char gap, near the upper-right (identical recipe to Fig 8 -- the two figures must match).
+fig.canvas.draw()  # finalise layout so transData reflects the rendered axes
+_p0 = a.transData.transform((0.0, 0.0)); _p1 = a.transData.transform((1.0, 1.0))
+_ang = float(np.degrees(np.arctan2(_p1[1] - _p0[1], _p1[0] - _p0[0])))
+_rad = np.radians(_ang); _gap = 4.0  # ~half-char gap, perpendicular below the line (pts)
+_chk = offset_copy(a.transData, fig=fig, x=_gap * np.sin(_rad), y=-_gap * np.cos(_rad),
+                   units='points')
+XM = 0.78
+a.text(XM, XM, 'chance', transform=_chk, rotation=_ang, rotation_mode='anchor',
+       ha='center', va='top', fontsize=7.6, color='#404040', fontstyle='italic', zorder=6)
+
 for ext in ('pdf', 'png'):
     fig.savefig(os.path.join(DIR, f'fig_extdomain.{ext}'), dpi=320, bbox_inches='tight')
 print(f'wrote fig_extdomain.pdf/.png ; diffusion AUC {auc_p:.3f} [{lo_p:.3f}, {hi_p:.3f}] '

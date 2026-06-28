@@ -1,192 +1,130 @@
 # -*- coding: utf-8 -*-
-# Elsevier graphical abstract for paper 2. landscape banner, single composite.
-# three left-to-right stages: ensemble Jacobian -> sign-agreement gate -> hybrid gradient.
-# numbers are the honest manuscript figures (external AUC 0.906~0.91, tau=0.9, 63% controlled).
+# Elsevier graphical abstract for paper 2 -- "reliability map" (polished with plot-from-data
+# scatter style: slate ink, soft bands, light dotted grid, white-edged markers, boxed annotation).
+# Hero: real per-component data (reliability.npz, same as fig:refute):
+#   x = gradient magnitude (log)  vs  y = cross-seed sign-agreement.
+# At the SAME large magnitude there are both trusted (green) and flagged (red) components ->
+# DIRECTION (vertical) decides trust, not MAGNITUDE (horizontal). Honest numbers only.
 import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle, Circle
+import matplotlib.colors as mcolors
+from matplotlib.patches import FancyBboxPatch, Ellipse
+from matplotlib.transforms import offset_copy
 
 DIR = os.path.dirname(os.path.abspath(__file__))
+INK = '#2c3e50'    # slate ink (all text)        — the palette upgrade
+GRN = '#1e7a45'    # trust (signs agree)
+RED = '#d1495b'    # verify (signs disagree) — softer rose-red than the harsh brick
+MUT = '#8a97a3'    # muted slate-grey for secondary marks
+GRID = '#e3e6e9'
 
-# palette matches the paper's figures
-NEU = '#444444'
-SIG = '#1f5fa6'   # neutral / curve
-ACC = '#c0392b'   # flagged / unreliable
-GRN = '#1e7a45'   # trusted
+def tint(c, a):
+    r = list(mcolors.to_rgba(c)); r[3] = a; return tuple(r)
 
 plt.rcParams.update({
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman'],
-    'mathtext.fontset': 'stix',
-    'pdf.fonttype': 42,
-    'ps.fonttype': 42,
-    'axes.spines.top': False,
-    'axes.spines.right': False,
+    'font.family': 'serif', 'font.serif': ['Times New Roman'],
+    'mathtext.fontset': 'stix', 'pdf.fonttype': 42, 'ps.fonttype': 42,
+    'axes.spines.top': False, 'axes.spines.right': False,
+    'axes.edgecolor': INK, 'axes.linewidth': 1.0,
+    'text.color': INK, 'axes.labelcolor': INK, 'xtick.color': INK, 'ytick.color': INK,
 })
 
-# canvas: ~1340 x 540 px at 100 dpi -> clears the >=531x1328 px floor
-fig = plt.figure(figsize=(13.4, 5.4))
-ax = fig.add_axes([0, 0, 1, 1])
-ax.set_xlim(0, 134); ax.set_ylim(0, 54); ax.axis('off')
+R = np.load(os.path.join(DIR, 'reliability.npz'))
+mag = R['magnitude']; sa = R['sign_agree']; thr = float(R['thr'])
+resp, null, rad = slice(0, 6), slice(6, 12), slice(12, 18)
 
-# light dividers between the three stages
-for xd in (45.5, 90.0):
-    ax.plot([xd, xd], [6, 47], color='#dddddd', lw=1.0, zorder=0)
+fig = plt.figure(figsize=(12.0, 6.0))
 
-# faint stage banners along the top
-def stage_header(x, n, txt, col):
-    ax.add_patch(Circle((x, 50.4), 1.35, facecolor=col, edgecolor='none', zorder=4))
-    ax.text(x, 50.4, n, ha='center', va='center', fontsize=12, color='white',
-            fontweight='bold', zorder=5)
-    ax.text(x + 2.6, 50.4, txt, ha='left', va='center', fontsize=12.5,
-            color=NEU, fontweight='bold')
+# ---------------- title block ----------------
+fig.text(0.5, 0.945, 'Direction, not magnitude', ha='center', va='center',
+         fontsize=26, fontweight='bold', color=INK)
+fig.text(0.5, 0.872, 'which design gradients of a differentiable surrogate to trust — '
+         'set by cross-seed sign agreement, not gradient size',
+         ha='center', va='center', fontsize=12.5, color=MUT, style='italic')
 
-stage_header(3.5, '1', 'Deep ensemble of differentiable surrogates', NEU)
-stage_header(48.5, '2', 'Solver-free sign-agreement gate', NEU)
-stage_header(93.0, '3', 'Cost-optimal hybrid gradient', NEU)
+# ---------------- hero: reliability map ----------------
+ax = fig.add_axes([0.070, 0.150, 0.555, 0.600])
+ax.set_xscale('log'); ax.set_xlim(5e-3, 45); ax.set_ylim(0.45, 1.07)
+ax.grid(True, color=GRID, lw=0.7, ls=':', zorder=0); ax.set_axisbelow(True)
 
-# ============================ STAGE 1 ============================
-# M independently retrained surrogates -> a per-component design Jacobian,
-# drawn as a small fan of gradient arrows with seed spread.
-sx = 6.0
-# stacked surrogate cards
-for k in range(4):
-    off = k * 0.9
-    ax.add_patch(FancyBboxPatch((sx + off, 28 - off), 9.5, 7.0,
-                 boxstyle='round,pad=0.1,rounding_size=0.4',
-                 facecolor='#f5f5f5' if k < 3 else '#eef3f9',
-                 edgecolor=SIG if k == 3 else '#cccccc', lw=1.2, zorder=3 + k))
-ax.text(sx + 2.7 + 5.0, 31.5, r'PINN$_m$', ha='center', va='center',
-        fontsize=13, fontweight='bold', color=NEU, zorder=8)
-ax.text(sx + 2.7 + 5.0, 28.0, r'$\Theta_m,\;m=1\dots M$', ha='center', va='center',
-        fontsize=9.5, color=SIG, zorder=8)
-ax.text(sx + 5.0, 21.3, 'independently retrained\n(M random seeds)',
-        ha='center', va='top', fontsize=9.0, color='#666666')
+# soft trust / verify bands + threshold
+ax.axhspan(thr, 1.07, color=tint(GRN, 0.10), zorder=0.5)
+ax.axhspan(0.45, thr, color=tint(RED, 0.06), zorder=0.5)
+ax.axhline(thr, color=INK, ls=(0, (5, 4)), lw=1.3, zorder=4)
+_tr = offset_copy(ax.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+ax.text(1.0, thr, r'trust threshold $\tau=0.9$', transform=_tr, ha='right', va='bottom',
+        fontsize=9.0, color=INK, style='italic')
+ax.text(6.0e-3, 1.022, 'TRUST', ha='left', va='center', fontsize=12, color=GRN, fontweight='bold')
+ax.text(6.0e-3, 0.493, 'VERIFY', ha='left', va='center', fontsize=12, color=RED, fontweight='bold')
 
-# fan of per-component gradient arrows (ensemble spread)
-gx = 24.0; gy = 31.5
-rng = np.random.default_rng(7)
-angles = np.array([18, 8, -2, -12, 26])      # spread of the ensemble gradient
-for j, a in enumerate(angles):
-    r = 12.5 + rng.uniform(-0.6, 0.6)
-    th = np.deg2rad(a)
-    col = GRN if j == 2 else '#9bbf9b'        # central direction in trusted green
-    lw = 2.6 if j == 2 else 1.3
-    ax.add_patch(FancyArrowPatch((gx, gy), (gx + r * np.cos(th), gy + r * np.sin(th)),
-                 arrowstyle='-|>', mutation_scale=15, color=col, lw=lw, zorder=6))
-ax.text(gx + 8.0, gy + 9.5, 'design Jacobian', ha='center', va='center',
-        fontsize=10.5, color=NEU)
-ax.text(gx + 8.0, gy + 7.4, r'$\partial \mathbf{r}/\partial g_k$ (free autodiff)',
-        ha='center', va='center', fontsize=10.0, color=NEU)
-ax.text(gx + 8.5, gy - 8.0, 'per-component spread\nacross seeds',
-        ha='center', va='top', fontsize=8.8, color='#777777', style='italic')
+# real per-component points (white-edged, prominent)
+ax.scatter(mag[resp], sa[resp], s=96, marker='o', facecolor=GRN, edgecolor='white',
+           linewidths=1.3, zorder=6, label='reliable — signs agree')
+ax.scatter(mag[null], sa[null], s=70, marker='X', facecolor=tint(RED, 0.55), edgecolor='white',
+           linewidths=1.0, zorder=6)
+ax.scatter(mag[rad], sa[rad], s=104, marker='X', facecolor=RED, edgecolor='white',
+           linewidths=1.2, zorder=7, label='unreliable — signs disagree')
 
-# ============================ STAGE 2 ============================
-# sign-agreement gate scores each component; trust threshold tau=0.9.
-# two example components: impedance (trusted) vs radiation (flagged).
-ax.text(48.0, 43.0, r'sign-agreement score  $a_k\!\in[0,1]$',
-        ha='left', va='center', fontsize=10.5, color=NEU)
+# vertical "same magnitude, opposite verdict" connector at the large-magnitude side
+xm = float(np.median(mag[rad]))
+ax.annotate('', xy=(xm, float(max(sa[resp])) - 0.012), xytext=(xm, float(np.median(sa[rad])) + 0.02),
+            arrowprops=dict(arrowstyle='<->', color=MUT, lw=1.2), zorder=5)
+ax.text(xm * 1.22, 0.815, 'same magnitude,\nopposite verdict', ha='left', va='center',
+        fontsize=8.8, color=MUT)
 
-# horizontal score axis
-bx0, bx1 = 49.5, 86.0
-by_imp, by_rad = 33.0, 21.5
-ax.plot([bx0, bx1], [by_imp - 4.5, by_imp - 4.5], color='#bbbbbb', lw=0.0)  # spacer
+# boxed annotation for the trap (large yet sign-unstable); a short straight arrow to the cluster
+cx = float(np.median(mag[rad])); cy_lo = float(sa[rad].min())
+ax.annotate('large gradients, yet sign-unstable —\nthe trap a magnitude rule falls for',
+            xy=(cx, cy_lo + 0.01), xytext=(0.42, 0.555), textcoords='data',
+            ha='center', va='center', fontsize=9.0, color=INK, zorder=9,
+            bbox=dict(boxstyle='round,pad=0.34', facecolor=tint(RED, 0.12), edgecolor=INK, lw=0.9),
+            arrowprops=dict(arrowstyle='->', color=INK, lw=1.1, shrinkB=6))
 
-def score_bar(y, label, sub, score, color, verdict, vcol):
-    ax.text(bx0 - 0.5, y + 2.2, label, ha='left', va='center',
-            fontsize=10.5, color=NEU)
-    ax.text(bx0 - 0.5, y + 0.2, sub, ha='left', va='center',
-            fontsize=8.6, color='#777777', style='italic')
-    track_y = y - 2.0
-    ax.add_patch(Rectangle((bx0, track_y), bx1 - bx0, 1.6,
-                 facecolor='#eeeeee', edgecolor='#cccccc', lw=0.8, zorder=2))
-    ax.add_patch(Rectangle((bx0, track_y), (bx1 - bx0) * score, 1.6,
-                 facecolor=color, edgecolor='none', zorder=3))
-    ax.text(bx1 + 0.7, track_y + 0.8, f'{score:.2f}', ha='left', va='center',
-            fontsize=10, color=color, fontweight='bold')
-    # verdict tag
-    ax.add_patch(FancyBboxPatch((bx0, y - 5.2), 18.0, 2.0,
-                 boxstyle='round,pad=0.05,rounding_size=0.3',
-                 facecolor=vcol, edgecolor='none', zorder=4))
-    ax.text(bx0 + 9.0, y - 4.2, verdict, ha='center', va='center',
-            fontsize=8.6, color='white', fontweight='bold', zorder=5)
+ax.set_xlabel(r'gradient magnitude  $|\partial \mathbf{r}/\partial g_k|$  (log scale)', fontsize=12.5)
+ax.set_ylabel('cross-seed sign-agreement', fontsize=12.5)
+ax.tick_params(direction='in', length=4, width=0.9, labelsize=10.5)
+ax.legend(loc='upper left', bbox_to_anchor=(0.015, 0.965), frameon=True, facecolor='white',
+          edgecolor='#cccccc', framealpha=0.96, fontsize=9.0, handletextpad=0.4,
+          borderpad=0.6, labelspacing=0.45)
 
-score_bar(by_imp, 'impedance gradient', 'seed-stable',
-          0.97, GRN, 'TRUSTED: free autodiff', GRN)
-score_bar(by_rad, 'radiation gradient', 'seed-unstable',
-          0.62, ACC, 'FLAGGED: 1 full-wave solve', ACC)
+# ---------------- right outcome panel ----------------
+rp = fig.add_axes([0.660, 0.150, 0.320, 0.600]); rp.set_xlim(0, 1); rp.set_ylim(0, 1); rp.axis('off')
 
-# trust threshold tau = 0.9
-tau = 0.9
-xt = bx0 + (bx1 - bx0) * tau
-ax.plot([xt, xt], [by_rad - 3.0, by_imp + 2.0], color='#222222', ls='--', lw=1.4, zorder=6)
-ax.text(xt, by_imp + 3.2, r'$\tau = 0.9$', ha='center', va='bottom',
-        fontsize=10.5, color='#222222', fontweight='bold')
+def pill(y, dotcol, head, sub, color):
+    rp.add_patch(FancyBboxPatch((0.04, y - 0.082), 0.92, 0.164,
+                 boxstyle='round,pad=0.018,rounding_size=0.045',
+                 facecolor=tint(color, 0.10), edgecolor=color, lw=1.6, zorder=2,
+                 transform=rp.transAxes))
+    rp.plot([0.135], [y], 'o', ms=13, color=color, transform=rp.transAxes, zorder=3, clip_on=False)
+    rp.text(0.235, y + 0.030, head, ha='left', va='center', fontsize=12.5, color=color,
+            fontweight='bold', zorder=3)
+    rp.text(0.235, y - 0.035, sub, ha='left', va='center', fontsize=9.6, color=INK, zorder=3)
 
-# ============================ STAGE 3 ============================
-# outcome: cost-optimal hybrid gradient + honest numbers.
-hx = 94.5
-ax.add_patch(FancyBboxPatch((hx, 27.5), 13.0, 9.0,
-             boxstyle='round,pad=0.1,rounding_size=0.5',
-             facecolor='#eef3f9', edgecolor=SIG, lw=1.4, zorder=3))
-ax.text(hx + 6.5, 33.7, 'hybrid', ha='center', va='center',
-        fontsize=12.5, fontweight='bold', color=SIG)
-ax.text(hx + 6.5, 31.3, 'gradient', ha='center', va='center',
-        fontsize=12.5, fontweight='bold', color=SIG)
-ax.text(hx + 6.5, 29.0, r'$\nabla_g \mathcal{L}$', ha='center', va='center',
-        fontsize=12, color=NEU)
+pill(0.865, GRN, 'signs agree → TRUST', 'use the free autodiff gradient (0 solves)', GRN)
+pill(0.640, RED, 'signs disagree → VERIFY', 'spend one full-wave solve', RED)
 
-# two feed-in legend lines: autodiff on trusted, FD only on flagged
-ax.add_patch(Rectangle((hx, 23.5), 1.6, 1.4, facecolor=GRN, edgecolor='none'))
-ax.text(hx + 2.2, 24.2, 'free autodiff on trusted',
-        ha='left', va='center', fontsize=9.2, color=NEU)
-ax.add_patch(Rectangle((hx, 20.8), 1.6, 1.4, facecolor=ACC, edgecolor='none'))
-ax.text(hx + 2.2, 21.5, 'finite-difference on flagged only',
-        ha='left', va='center', fontsize=9.2, color=NEU)
-
-# honest headline numbers
-ny = 14.5
-ax.add_patch(FancyBboxPatch((hx - 0.5, ny - 7.0), 38.0, 9.6,
-             boxstyle='round,pad=0.1,rounding_size=0.4',
-             facecolor='#fafafa', edgecolor='#dddddd', lw=1.0, zorder=2))
-ax.text(hx + 0.6, ny + 1.0, 'AUC ', ha='left', va='center', fontsize=12, color=NEU)
-ax.text(hx + 5.2, ny + 1.0, '0.91', ha='left', va='center',
-        fontsize=15, fontweight='bold', color=GRN)
-ax.text(hx + 9.6, ny + 1.0, 'predicting gradient sign-correctness',
-        ha='left', va='center', fontsize=9.6, color=NEU)
-ax.text(hx + 9.6, ny - 1.0, 'on an external transfer-matrix benchmark',
-        ha='left', va='center', fontsize=8.6, color='#777777', style='italic')
-
-ax.text(hx + 0.6, ny - 4.0, 'trusts impedance, rejects radiation',
-        ha='left', va='center', fontsize=10.5, fontweight='bold', color=GRN)
-ax.text(hx + 0.6, ny - 5.9, 'the seed-unstable direction that fools MC-dropout',
-        ha='left', va='center', fontsize=8.4, color='#777777', style='italic')
-
-# ============================ stage-to-stage arrows ============================
-ax.add_patch(FancyArrowPatch((43.0, 31.5), (48.0, 31.5), arrowstyle='-|>',
-             mutation_scale=22, color=NEU, lw=2.2, zorder=7))
-ax.add_patch(FancyArrowPatch((88.0, 27.5), (93.5, 31.0), arrowstyle='-|>',
-             mutation_scale=22, color=NEU, lw=2.2, zorder=7))
-
-# bottom one-line takeaway
-ax.text(67.0, 3.2,
-        'A solver-free deep-ensemble gradient-reliability gate: trust free autodiff where seeds agree, verify only where they do not.',
-        ha='center', va='center', fontsize=10.0, color=NEU, style='italic')
+# headline result card
+rp.add_patch(FancyBboxPatch((0.04, 0.070), 0.92, 0.395,
+             boxstyle='round,pad=0.018,rounding_size=0.045',
+             facecolor='#f5f7f9', edgecolor='#d6dce1', lw=1.1, zorder=1, transform=rp.transAxes))
+rp.text(0.50, 0.395, 'solver-free reliability gate', ha='center', va='center', fontsize=11.5, color=INK)
+rp.text(0.50, 0.285, 'AUC 0.91', ha='center', va='center', fontsize=30, fontweight='bold', color=GRN)
+rp.text(0.50, 0.180, 'predicts gradient sign-correctness', ha='center', va='center', fontsize=10.2, color=INK)
+rp.text(0.50, 0.122, 'on an external transfer-matrix benchmark', ha='center', va='center',
+        fontsize=9.0, color=MUT, style='italic')
 
 out_pdf = os.path.join(DIR, 'fig_graphical_p2.pdf')
 out_png = os.path.join(DIR, 'fig_graphical_p2.png')
 fig.savefig(out_pdf)
-fig.savefig(out_png, dpi=110)
+fig.savefig(out_png, dpi=150)
 plt.close(fig)
-
-# report pixel size of the png
 try:
     from PIL import Image
     w, h = Image.open(out_png).size
-    print(f'fig_graphical_p2: PNG {w}x{h} px (w x h), PDF + PNG written to {DIR}')
+    print(f'fig_graphical_p2 (polished reliability-map): PNG {w}x{h} px; {len(mag)} pts; -> {DIR}')
 except Exception:
-    print(f'fig_graphical_p2: written to {DIR}')
+    print('fig_graphical_p2 (polished reliability-map): written')

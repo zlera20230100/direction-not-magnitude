@@ -72,8 +72,12 @@ def make_method():
                               facecolor=SIG, edgecolor='white', lw=0.5))
 
     def leader(yc, text, color=NEU):
-        a.plot([x0 + w + 0.1, x0 + w + 0.45], [yc, yc], color='#aaaaaa', lw=0.6)
-        a.text(x0 + w + 0.55, yc, text, va='center', ha='left', fontsize=8.6, color=color)
+        # short pointer with an arrowhead aimed back at the layer edge
+        a.annotate('', xy=(x0 + w + 0.08, yc), xytext=(x0 + w + 0.5, yc),
+                   arrowprops=dict(arrowstyle='-|>', color='#888888', lw=0.9,
+                                   shrinkA=0, shrinkB=0,
+                                   mutation_scale=8))
+        a.text(x0 + w + 0.6, yc, text, va='center', ha='left', fontsize=8.6, color=color)
     leader(0.8 + 0.275, 'ground plane')
     leader(1.35 + 0.75, 'FR4 substrate ($\\varepsilon_r=4.4$)')
     leader(2.85 + 1.2, 'air cavity')
@@ -100,15 +104,30 @@ def make_method():
                     facecolor='#eef3f9', edgecolor=SIG, lw=1.0))
         b.text(0.975, y, s, ha='center', va='center', fontsize=11)
     b.text(0.975, 8.55, 'inputs', ha='center', fontsize=8.2, color='#777')
-    # collect inputs onto a vertical bus, then a single arrow into the PINN
+    # collect inputs onto a vertical bus, then a single arrow into the PINN.
+    # ONE unified flow style: stubs, bus, lead-in and every directional arrow
+    # share the same dark colour, linewidth and arrowhead size, so the whole
+    # path reads as a single clean structural flow (no grey-vs-black mismatch).
+    FLOW = '#404040'           # one structural-connector colour (matches guides)
+    FLW = 1.5                  # one structural-connector linewidth
+    FMS = 14                   # one arrowhead size for every -|> connector
     busx = 2.35
+    boxr = 0.5 + 0.95 + 0.02   # right edge of the input boxes (incl. pad)
+    ymid = 5.0                 # bus midpoint (== mean of iy)
+    # per-input stubs meet the bus exactly
     for y in iy:
-        b.add_patch(FancyArrowPatch((1.5, y), (busx, y), arrowstyle='-',
-                    color='#cccccc', lw=0.8))
-    b.add_patch(FancyArrowPatch((busx, iy.min()), (busx, iy.max()),
-                arrowstyle='-', color='#cccccc', lw=0.8))
-    b.add_patch(FancyArrowPatch((busx, 5.0), (3.42, 5.0),
-                arrowstyle='-|>', color=NEU, lw=1.4))
+        b.plot([boxr, busx], [y, y], color=FLOW, lw=FLW,
+               solid_capstyle='round', zorder=1)
+    # vertical bus, drawn slightly past the end stubs so the T-junctions are solid
+    b.plot([busx, busx], [iy.min(), iy.max()], color=FLOW, lw=FLW,
+           solid_capstyle='round', zorder=1)
+    # the lead-in continues the bus toward the PINN as the SAME dark line, then
+    # the arrowhead enters the box edge (box left edge incl. pad ~3.45)
+    b.plot([busx, 3.0], [ymid, ymid], color=FLOW, lw=FLW,
+           solid_capstyle='round', zorder=1)
+    b.add_patch(FancyArrowPatch((3.0, ymid), (3.5, ymid),
+                arrowstyle='-|>', color=FLOW, lw=FLW, mutation_scale=FMS,
+                shrinkA=0, shrinkB=0, zorder=2))
     # network box
     b.add_patch(FancyBboxPatch((3.5, 3.0), 3.0, 4.0,
                 boxstyle='round,pad=0.05,rounding_size=0.18',
@@ -122,14 +141,17 @@ def make_method():
                 boxstyle='round,pad=0.03,rounding_size=0.12',
                 facecolor='#eef3f9', edgecolor=SIG, lw=1.0))
     b.text(8.575, 5.85, r'$\mathbf{E}(x,y,z,f;g)$', ha='center', va='center', fontsize=9.5)
-    b.add_patch(FancyArrowPatch((6.55, 5.6), (7.35, 5.85), arrowstyle='-|>', color=NEU, lw=1.4))
+    b.add_patch(FancyArrowPatch((6.55, 5.6), (7.35, 5.85), arrowstyle='-|>',
+                color=FLOW, lw=FLW, mutation_scale=FMS))
     # autodiff gradient output
     b.add_patch(FancyBboxPatch((7.4, 2.65), 2.35, 1.2,
                 boxstyle='round,pad=0.03,rounding_size=0.12',
                 facecolor='#fbeceb', edgecolor=ACC, lw=1.0))
     b.text(8.575, 3.25, r'$\partial\mathbf{E}/\partial g$', ha='center', va='center',
            fontsize=11, color=ACC)
-    b.add_patch(FancyArrowPatch((6.55, 4.4), (7.35, 3.25), arrowstyle='-|>', color=ACC, lw=1.4))
+    # the single semantic accent: red colour, but SAME linewidth/arrowhead as E
+    b.add_patch(FancyArrowPatch((6.55, 4.4), (7.35, 3.25), arrowstyle='-|>',
+                color=ACC, lw=FLW, mutation_scale=FMS))
     b.text(8.575, 2.25, 'autodiff (one backward pass)', ha='center', va='top',
            fontsize=7.4, color=ACC)
     panel_label(b, '(b)', x=0.0, y=0.99)
@@ -170,7 +192,14 @@ def make_forward():
     grp = grp[:len(order)]
     b.bar(range(len(order)), s11, color=grp, width=0.7)
     mean = np.mean(s11)
-    b.axhline(mean, ls=':', color='#222', lw=1.2)
+    b.axhline(mean, ls=(0, (5, 4)), color='#404040', lw=1.4, zorder=1)
+    # label hugs its guide line: right-aligned at the line's right end, ~half a
+    # char above it (offset is in screen points, so +3pt is visually ABOVE even
+    # though this S11 axis is inverted). ref-line label convention v2.
+    from matplotlib.transforms import offset_copy
+    tr = offset_copy(b.get_yaxis_transform(), fig=fig, x=-2, y=3, units='points')
+    b.text(1.0, mean, f'mean {mean:.1f} dB', transform=tr, ha='right',
+           va='bottom', fontsize=7.6, color='#404040', style='italic')
     b.legend(handles=[mpatches.Patch(color=NEU, label='uniform'),
                       mpatches.Patch(color=SIG, label='phase-gradient codes'),
                       mpatches.Patch(color=ACC, label='surrogate codes')],
@@ -210,9 +239,9 @@ def make_jacobian():
 
     zt = fw['zones']; fd = fw['fd_grad']; sr = fw['surrogate_rela']
     xb = np.arange(len(zt))
-    b.bar(xb - w / 2, sr, w, color=SIG, label='surrogate')
-    b.bar(xb + w / 2, fd, w, color=ACC, label='full-wave FD')
-    b.axhline(0, color='k', lw=0.8)
+    b.bar(xb - w / 2, sr, w, color=SIG, label='surrogate', zorder=2)
+    b.bar(xb + w / 2, fd, w, color=ACC, label='full-wave FD', zorder=2)
+    b.axhline(0, ls=(0, (5, 4)), color='#404040', lw=1.4, zorder=1)
     b.set_xticks(xb); b.set_xticklabels([f'zone {int(z)}' for z in zt])
     b.set_ylabel(r'$\partial\ln Q_{\mathrm{ap}}/\partial g_k$')
     b.legend(frameon=False, fontsize=8.5)

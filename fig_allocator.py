@@ -38,20 +38,26 @@ ax.plot(gcost[keep], gerr[keep], ':D', color=SIG, ms=5.5, lw=1.4, zorder=4,
 ax.plot(Bs, err_rank, '-o', color=GRN, ms=6, lw=2.2, zorder=5, label='rank-and-allocate (proposed)')
 ax.plot(Bs, err_orac, '--*', color='0.30', ms=9, lw=1.4, zorder=4, label='oracle (lower bound)')
 
-# mark the gate's realized operating point and its budget spread (the thing the allocator fixes)
-ax.errorbar([op_c], [op_e], xerr=[[op_cstd], [op_cstd]], fmt='none', ecolor=SIG, elinewidth=1.4,
-            capsize=4, zorder=6, alpha=0.9)
-ax.annotate(f'gate @ $\\tau={tau}$: budget\nmean {op_c:.2f}, std {op_cstd:.2f}\n(uncontrolled)',
-            xy=(op_c, op_e), xytext=(0.1, 0.15), fontsize=8.0, color=SIG, ha='left', va='top',
+# Mark the gate's realized operating point and its HORIZONTAL (budget-direction) spread. This is the
+# ONLY point with a bar because every other series is plotted at a FIXED, user-chosen budget B (no
+# x-spread), whereas the tau-gate's realized budget is a random, data-dependent quantity -- the
+# uncontrolled budget the allocator replaces with an exact B. The bar is in x (solves), not y (error).
+ax.errorbar([op_c], [op_e], xerr=[[op_cstd], [op_cstd]], fmt='D', color=SIG, mfc=SIG, mec='white',
+            mew=0.8, ms=6.5, ecolor=SIG, elinewidth=1.4, capsize=4, zorder=7, alpha=0.95)
+ax.annotate(f'gate @ $\\tau={tau}$: realized\n'
+            f'budget uncontrolled (bar $=$\n'
+            f'$\\pm$std of solves spent, $B$):\n'
+            f'mean {op_c:.2f} $\\pm$ {op_cstd:.2f} solves',
+            xy=(op_c, op_e), xytext=(0.05, 0.075), fontsize=7.3, color=SIG, ha='left', va='top',
             arrowprops=dict(arrowstyle='->', color=SIG, lw=1.1,
-                            connectionstyle='arc3,rad=0.0'))
+                            connectionstyle='arc3,rad=-0.18'))
 
 ax.set_xlabel('full-wave (FD) solves spent,  $B$  (of %d components)' % K)
 ax.set_ylabel('relative gradient error  $\\|g-a\\|/\\|a\\|$')
 ax.set_xlim(-0.15, K + 0.15); ax.set_ylim(-0.02, 0.55)
 ax.set_xticks(range(0, K + 1))
 ax.legend(loc='upper right', frameon=False, fontsize=8.2)
-ax.text(0.975, 0.66,
+ax.text(0.975, 0.77,
         f'rank-allocate: {area_vs_random:.0f}% smaller frontier area than random;\n'
         f'closes $\\sim${gap_closed:.0f}% of the gap to the oracle.\n'
         f'the threshold gate is its variable-budget special case\n'
