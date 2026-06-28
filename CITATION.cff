@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software or data, please cite it as below."
-title: "Reproducibility code and data for: A Solver-Free Deep-Ensemble Gate for Trusting the Design Gradients of Differentiable PDE Surrogates, Validated on a Data-Free EM-PINN and an External Photonics Benchmark"
+title: "Reproducibility code and data for: Direction, Not Magnitude: A Portable, Solver-Free Reliability Gate for Differentiable-Surrogate Design Gradients"
 type: software
 license: MIT
 authors:
@@ -9,6 +9,9 @@ authors:
     affiliation: "Hubei University of Automotive Technology"
   - family-names: Shi
     given-names: Xuan
+    affiliation: "Hubei University of Automotive Technology"
+  - family-names: Boateng
+    given-names: Nimako Samuel
     affiliation: "Hubei University of Automotive Technology"
   - family-names: Huang
     given-names: Bokai

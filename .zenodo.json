@@ -1,5 +1,5 @@
 {
-  "title": "Reproducibility code and data for: A Solver-Free Deep-Ensemble Gate for Trusting the Design Gradients of Differentiable PDE Surrogates, Validated on a Data-Free EM-PINN and an External Photonics Benchmark",
+  "title": "Reproducibility code and data for: Direction, Not Magnitude: A Portable, Solver-Free Reliability Gate for Differentiable-Surrogate Design Gradients",
   "upload_type": "software",
   "description": "Figure generators and frozen result data reproducing every figure in the paper, with the analysis and experiment scripts that produced the data. Includes the deep-ensemble gradient-reliability gate, its calibration, the MC-dropout comparison, the reliability-gated cost-optimal hybrid gradient, a thin-film transfer-matrix external benchmark, and the full-wave audits. Every figure reproduces from the provided .npz; the PINN device experiments additionally require the project framework, which is not bundled.",
   "license": "MIT",
@@ -15,6 +15,7 @@
   "creators": [
     {"name": "Qin, Xuan", "affiliation": "Hubei University of Automotive Technology"},
     {"name": "Shi, Xuan", "affiliation": "Hubei University of Automotive Technology"},
+    {"name": "Boateng, Nimako Samuel", "affiliation": "Hubei University of Automotive Technology"},
     {"name": "Huang, Bokai", "affiliation": "Hubei University of Automotive Technology"},
     {"name": "Wu, Shengjun", "affiliation": "Hubei University of Automotive Technology"},
     {"name": "You, Kai", "affiliation": "Hubei University of Automotive Technology"},

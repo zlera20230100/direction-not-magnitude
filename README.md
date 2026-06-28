@@ -1,9 +1,8 @@
 # Reproducibility repository — Paper 2
 
-**A Solver-Free Deep-Ensemble Gate for Trusting the Design Gradients of Differentiable PDE
-Surrogates, Validated on a Data-Free EM-PINN and an External Photonics Benchmark**
+**Direction, Not Magnitude: A Portable, Solver-Free Reliability Gate for Differentiable-Surrogate Design Gradients**
 
-Xuan Qin, Xuan Shi, Bokai Huang, Shengjun Wu, Kai You, Long Zhang\* (corresponding: 20230100@huat.edu.cn)
+Xuan Qin, Xuan Shi, Nimako Samuel Boateng, Bokai Huang, Shengjun Wu, Kai You, Long Zhang\* (corresponding: 20230100@huat.edu.cn)
 Hubei University of Automotive Technology, Shiyan 442002, China
 
 This repository contains the figure generators and the frozen result data (`.npz`) needed to
